@@ -2,6 +2,7 @@
 
 ```sh
 npm create astro@latest -- --template basics
+https://docs.astro.build/en/guides/styling/#tailwind
 ```
 
 > 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
