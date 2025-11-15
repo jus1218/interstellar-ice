@@ -1,17 +1,23 @@
 ---
-
+import { actions } from "astro:actions";
 ---
 
 <section class="w-full max-w-xl mx-auto">
-  <form id="newsletter-form" class="flex flex-col gap-4">
+  <form
+    id="newsletter-form"
+    class="flex flex-col gap-4"
+    method="post"
+    action={actions.newsletter}
+  >
     <div class="flex flex-col sm:flex-row gap-3">
+      <!-- type="email"
+        required -->
       <input
         name="email"
         class="flex-1 px-4 py-3 rounded-lg bg-black/50 border
          border-white/80 backdrop-blur-lg text-white placeholder:text-white/50
          focus:ring-2 focus:outline-none focus:ring-brand focus:border-transparent"
-        type="email"
-        required
+        
         placeholder="Contenido exclusivo sólo para los reals"
       />
 
@@ -23,6 +29,48 @@
       </button>
     </div>
 
-    <div id="newsletter-message" class="hidden text-sm text-center text-brand">¡Ya eres parte del team!</div>
+    <div id="newsletter-message" class=" hidden text-sm text-center bg-gray-800 rounded-sm text-brand py-2" >
+      ¡Ya eres parte del team!
+    </div>
   </form>
 </section>
+
+<script>
+  import { actions, isInputError } from "astro:actions";
+  import { throwConfetti } from "../../utils/confetti";
+  const d = document;
+  const form = d.getElementById("newsletter-form") as HTMLFormElement;
+  const messageContent = d.getElementById("newsletter-message") as HTMLElement;
+
+  messageContent.classList.add("hidden");
+  messageContent.classList.remove("text-green-500", "text-red-500");
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+
+    const email = formData.get("email") as string;
+
+    const { data, error } = await actions.newsletter({ email });
+
+    messageContent.classList.remove("hidden");
+
+    if (error) {
+      const msg = isInputError(error)
+        ? error.fields.email!.join(", ")
+        : error.message;
+
+      messageContent.textContent = msg;
+      messageContent.classList.remove("text-green-500");
+      messageContent.classList.add("text-red-500");
+    }
+
+    console.log(data);
+    messageContent.textContent = data!.message;
+    messageContent.classList.remove("text-red-500");
+    messageContent.classList.add("text-green-500");
+
+    if (data?.type === 1) throwConfetti();
+  });
+</script>
